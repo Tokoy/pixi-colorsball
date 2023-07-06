@@ -24,10 +24,19 @@ function checkCollision(ball1, ball2) {
 function mergeBalls(ball1, ball2) {
   score += 10;
   scoreText.text = `Score: ${score}`;
-  // const x = ball2.x;
-  // const y = ball2.y;
+  const x = ball2.x;
+  const y = ball2.y;
   app.stage.removeChild(ball1);
+  balls.splice(balls.findIndex(g => g.name === ball1.name),1)
   app.stage.removeChild(ball2);
+  balls.splice(balls.findIndex(g => g.name === ball2.name),1)
+  //原地再生成一个新的颜色球
+  const newball = createMasterBall(balls[balls.length-1].tint);
+  newball.name = balls.length;
+  newball.x = x
+  newball.y = y
+  balls.push(newball);
+  app.stage.addChild(newball);
 }
 
 // 拖动小球
@@ -56,7 +65,7 @@ function onDragMove() {
     for (let i = 0; i < app.stage.children.length; i++) {
       const otherBall = app.stage.children[i];
       if (this !== otherBall && checkCollision(this, otherBall)) {
-        if (this.tint === otherBall.tint) {
+        if (this.tint === otherBall.tint || this.name === 0) {
           mergeBalls(this, otherBall);//相同颜色小球合并
         } else {
           gameover();
@@ -72,26 +81,31 @@ function gameover(){
 
 
 function start(number){
-  // 创建小球
+  // 创建主小球
+  const masterball = createMasterBall("#FFFFFF");
+  masterball.name = balls.length;
+  balls.push(masterball);
+  app.stage.addChild(masterball);
+
+  // 创建其他小球
   while (balls.length < number) {
     let color = colors[Math.floor(Math.random() * colors.length)];
-    for(let c = 0; c < 2; c++){
-      const ball = createBall(color);
-      // 检查小球位置是否重叠
-      let overlap = false;
-      for (let i = 0; i < balls.length; i++) {
-        const otherBall = balls[i];
-        //判断新生成的小球和其他任意球没有碰撞
-        const distance = Math.sqrt((ball.x - otherBall.x) ** 2 + (ball.y - otherBall.y) ** 2);
-        if (distance < (ball.width + otherBall.width)/2) {
-          overlap = true;
-          break;
-        }
+    const ball = createBall(color);
+    // 检查小球位置是否重叠
+    let overlap = false;
+    for (let i = 0; i < balls.length; i++) {
+      const otherBall = balls[i];
+      //判断新生成的小球和其他任意球没有碰撞
+      const distance = Math.sqrt((ball.x - otherBall.x) ** 2 + (ball.y - otherBall.y) ** 2);
+      if (distance < (ball.width + otherBall.width)/2) {
+        overlap = true;
+        break;
       }
-      if (!overlap) {
-        balls.push(ball);
-        app.stage.addChild(ball);
-      }
+    }
+    if (!overlap) {
+      ball.name = balls.length;
+      balls.push(ball);
+      app.stage.addChild(ball);
     }
   }
 }
@@ -99,6 +113,27 @@ function start(number){
 // 生成随机颜色和大小的小球
 function createBall(color) {
   const radius = 30 + Math.random() * 20;
+  const ball = new PIXI.Graphics();
+  ball.beginFill(color);
+  ball.drawCircle(0, 0, radius);
+  ball.endFill();
+  ball.tint = color;
+  ball.x = Math.random() * (app.renderer.width - radius * 2) + radius;
+  ball.y = Math.random() * (app.renderer.height - radius * 2) + radius;
+  ball.vx = 0;
+  ball.vy = 0;
+  ball.interactive = false;
+  ball.buttonMode = true;
+  ball.on("pointerdown", onDragStart);
+  ball.on("pointerup", onDragEnd);
+  ball.on("pointerupoutside", onDragEnd);
+  ball.on("pointermove", onDragMove);
+  return ball;
+}
+
+function createMasterBall(ballcolor) {
+  const color = ballcolor
+  const radius = 30;
   const ball = new PIXI.Graphics();
   ball.beginFill(color);
   ball.drawCircle(0, 0, radius);
@@ -121,7 +156,6 @@ function createBall(color) {
 function nextLevel(){
   level = level + 1 ;
   number = number * 2;
-  balls.splice(0, balls.length);
   start(number);
 }
 
