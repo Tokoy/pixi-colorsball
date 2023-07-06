@@ -26,17 +26,19 @@ function mergeBalls(ball1, ball2) {
   scoreText.text = `Score: ${score}`;
   const x = ball2.x;
   const y = ball2.y;
-  app.stage.removeChild(ball1);
   balls.splice(balls.findIndex(g => g.name === ball1.name),1)
-  app.stage.removeChild(ball2);
   balls.splice(balls.findIndex(g => g.name === ball2.name),1)
+  app.stage.removeChild(ball1);
+  app.stage.removeChild(ball2);
   //原地再生成一个新的颜色球
-  const newball = createMasterBall(balls[balls.length-1].tint);
-  newball.name = balls.length;
-  newball.x = x
-  newball.y = y
-  balls.push(newball);
-  app.stage.addChild(newball);
+  if(balls.length>0){
+    const newball = createMasterBall(balls[0].tint);
+    newball.name = balls.length+newball.tint;
+    newball.x = x
+    newball.y = y
+    balls.push(newball);
+    app.stage.addChild(newball);
+  }
 }
 
 // 拖动小球
@@ -65,7 +67,7 @@ function onDragMove() {
     for (let i = 0; i < app.stage.children.length; i++) {
       const otherBall = app.stage.children[i];
       if (this !== otherBall && checkCollision(this, otherBall)) {
-        if (this.tint === otherBall.tint || this.name === 0) {
+        if (this.tint === otherBall.tint || this.name === "masterball") {
           mergeBalls(this, otherBall);//相同颜色小球合并
         } else {
           gameover();
@@ -83,12 +85,12 @@ function gameover(){
 function start(number){
   // 创建主小球
   const masterball = createMasterBall("#FFFFFF");
-  masterball.name = balls.length;
+  masterball.name = "masterball";
   balls.push(masterball);
   app.stage.addChild(masterball);
 
   // 创建其他小球
-  while (balls.length < number) {
+  while (balls.length <= number) {
     let color = colors[Math.floor(Math.random() * colors.length)];
     const ball = createBall(color);
     // 检查小球位置是否重叠
@@ -103,7 +105,7 @@ function start(number){
       }
     }
     if (!overlap) {
-      ball.name = balls.length;
+      ball.name = balls.length+ball.tint;
       balls.push(ball);
       app.stage.addChild(ball);
     }
