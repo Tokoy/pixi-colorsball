@@ -33,7 +33,7 @@ function mergeBalls(ball1, ball2) {
   //原地再生成一个新的颜色球
   if(balls.length>0){
     const newball = createMasterBall(balls[0].tint);
-    newball.name = balls.length+newball.tint;
+    newball.name = Math.round(newball.x+newball.y);
     newball.x = x
     newball.y = y
     balls.push(newball);
@@ -105,7 +105,7 @@ function start(number){
       }
     }
     if (!overlap) {
-      ball.name = balls.length+ball.tint;
+      ball.name = Math.round(ball.x+ball.y);
       balls.push(ball);
       app.stage.addChild(ball);
     }
