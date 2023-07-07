@@ -7,10 +7,13 @@ const balls = [];
 let level = 0;
 let number = 4;
 let score = 0;
+let startTime = null;
 const scoreText = new PIXI.Text(`Score: ${score}`, { fontSize: 24, fill: 0x000000 });
 scoreText.anchor.set(1, 0);
 scoreText.position.set(app.renderer.width - 10, 10);
+const timeText = new PIXI.Text(`Time: ${score}`, { fontSize: 24, fill: 0x000000 });;
 app.stage.addChild(scoreText);
+app.stage.addChild(timeText);
 
 // 碰撞检测
 function checkCollision(ball1, ball2) {
@@ -70,6 +73,7 @@ function onDragMove() {
         if (this.tint === otherBall.tint || this.name === "masterball") {
           mergeBalls(this, otherBall);//相同颜色小球合并
         } else {
+          this.interactive = false;
           gameover();
         }
       }
@@ -78,7 +82,9 @@ function onDragMove() {
 }
 
 function gameover(){
-  console.log("游戏结束!!!");
+  alert(`游戏结束！本次游戏用时：${timeText.text}秒,得分：${score}分！`);
+  app.stage.removeChild(timeText);
+  app.stage.removeChild(scoreText);
 }
 
 
@@ -110,6 +116,7 @@ function start(number){
       app.stage.addChild(ball);
     }
   }
+  startTime = Date.now();
 }
 
 // 生成随机颜色和大小的小球
@@ -163,6 +170,7 @@ function nextLevel(){
 
 // 在每帧更新时检查小球碰撞
 function update() {
+  timeText.text = (Date.now() - startTime) / 1000;
   if (app.stage.children.length === 1) {
     nextLevel();
   }
