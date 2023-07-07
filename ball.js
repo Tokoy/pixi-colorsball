@@ -1,4 +1,4 @@
-const app = new PIXI.Application({ width: 600, height: 800, backgroundColor: 0xEEEEEE });
+const app = new PIXI.Application({ width: 600, height: 800, backgroundColor: 0xEEEEEE ,resizeTo: window,});
 document.body.appendChild(app.view);
 
 const colors = ['0xFF0000', '0x00FF00', '0x0000FF', '0xFF00FF', '0x00FFFF', '0x800080', '0xFFA500', '0x008080'];
