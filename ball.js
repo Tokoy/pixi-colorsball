@@ -34,7 +34,7 @@ function mergeBalls(ball1, ball2) {
   app.stage.removeChild(ball1);
   app.stage.removeChild(ball2);
   //原地再生成一个新的颜色球
-  if(balls.length>0){
+  if(balls.length > 0){
     const newball = createMasterBall(balls[0].tint);
     newball.name = Math.round(newball.x+newball.y);
     newball.x = x
@@ -55,9 +55,16 @@ function onDragEnd() {
   this.alpha = 1;
   this.dragging = false;
   this.data = null;
-  // 检查游戏是否结束
-  if (app.stage.children.length === 0) {
-      gameover();
+  for (let i = 0; i < app.stage.children.length; i++) {
+    const otherBall = app.stage.children[i];
+    if (this !== otherBall && checkCollision(this, otherBall)) {
+      if (this.tint === otherBall.tint || this.name === "masterball") {
+        mergeBalls(this, otherBall);//相同颜色小球合并
+      } else {
+        this.interactive = false;
+        gameover();
+      }
+    }
   }
 }
 
@@ -171,7 +178,7 @@ function nextLevel(){
 // 在每帧更新时检查小球碰撞
 function update() {
   timeText.text = (Date.now() - startTime) / 1000;
-  if (app.stage.children.length === 1) {
+  if (balls.length === 0) {
     nextLevel();
   }
 }
